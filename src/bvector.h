@@ -174,10 +174,6 @@ namespace GZBlock {
             switchColors(vec.at(secondIndex));
 
             steps.pop();
-
-            if (steps.size() == 0) {
-                SDL_RenderPresent(renderer);
-            }
         }
     };
 }
