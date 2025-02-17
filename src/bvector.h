@@ -29,7 +29,7 @@ namespace GZBlock {
         SDL_FRect* rects;
         std::vector<Block> vec;
         std::queue<std::tuple<Uint32, Uint32>> steps;
-
+        
         BVector(Uint32 numberOfBlocks) {
             fillBlocks(numberOfBlocks);
             toArray();
@@ -105,15 +105,14 @@ namespace GZBlock {
         }
 
         void renderBlocks(SDL_Renderer* renderer) {
-            //SDL_FRect* rects = toArray();
             for (Uint32 i = 0; i < vec.size(); i++) {
                 rects[i] = vec.at(i).rect;
                 setBlockDimensions(vec.at(i), i);
                 
                 if (vec.at(i).targeted)
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColorFloat(renderer, 1.0f, 0.0f, 0.0f, SDL_ALPHA_OPAQUE);
                 else
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColorFloat(renderer, 1.0f, 1.0f, 1.0f, SDL_ALPHA_OPAQUE);
 
                 SDL_RenderFillRect(renderer, &rects[i]);
             }
