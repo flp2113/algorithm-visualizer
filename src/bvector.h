@@ -14,26 +14,30 @@
 #include <string>
 #include <ctime>
 
+#define DEBUG
+
 namespace GZBlock {
     typedef struct {
         Uint32 index;
-        Uint32 value;
+        float value;
         SDL_FRect rect;
         bool targeted;
     } Block;
 
     class BVector {
-    protected:
+    public:
+        SDL_FRect* rects;
         std::vector<Block> vec;
         std::queue<std::tuple<Uint32, Uint32>> steps;
 
-    public:
         BVector(Uint32 numberOfBlocks) {
             fillBlocks(numberOfBlocks);
+            toArray();
             bubbleSort();
         }
 
         BVector(std::vector<Block> v) : vec(v) {
+            toArray();
             bubbleSort();
         }
 
@@ -41,12 +45,36 @@ namespace GZBlock {
             if (isInvalidIndex(index))
                 throw std::out_of_range("GET BLOCK: OUT OF BOUNDS INDEX");
 
-            return vec.at(index);
+            Block block = vec.at(index);
+
+            #ifdef DEBUG
+                std::cout << "(DEBUG) GET BLOCK: "
+                    << "[" << block.index << ", "
+                    << block.value << ", "
+                    << "{ " << block.rect.x << ", " << block.rect.y << ", " << block.rect.w << ", " << block.rect.h << " }, "
+                    << (block.targeted ? "true" : "false") << "]" << std::endl;
+            #endif
+
+            return block;
         }
 
         void setBlock(Uint32 index, Block block) {
             if (isInvalidIndex(index))
                 throw std::out_of_range("SET BLOCK: OUT OF BOUNDS INDEX");
+
+            Block toChange = vec.at(index);
+
+            #ifdef DEBUG
+                std::cout << "(DEBUG) SET BLOCK: "
+                    << "[" << toChange.index << ", "
+                    << toChange.value << ", "
+                    << "{ " << toChange.rect.x << ", " << toChange.rect.y << ", " << toChange.rect.w << ", " << toChange.rect.h << " }, "
+                    << (toChange.targeted ? "true" : "false") << "] ===> "
+                    << "[" << block.index << ", "
+                    << block.value << ", "
+                    << "{ " << block.rect.x << ", " << block.rect.y << ", " << block.rect.w << ", " << block.rect.h << " }, "
+                    << (block.targeted ? "true" : "false") << "]" << std::endl;
+            #endif
 
             vec.at(index) = block;
         }
@@ -56,33 +84,32 @@ namespace GZBlock {
         }
 
         void setSize(size_t size) {
-            if (size < 0)
+            if (size > UINT32_MAX)
                 throw std::out_of_range("SET SIZE: INVALID SIZE");
 
             vec.resize(size);
+            delete[] rects;
+            rects = nullptr;
+
+            while (!steps.empty()) {
+                steps.pop();
+            }
+
+            fillBlocks(size);
+            toArray();
+            bubbleSort();
         }
 
         bool isEmpty() {
             return vec.size() == 0;
         }
 
-        bool isInvalidIndex(Uint32 index) {
-            return index < 0 || index > vec.size() - 1;
-        }
-
-        void setBlockDimensions(Block& block, Uint32 index) {
-            block.rect.h = static_cast<float>(block.value);
-            block.rect.w = WINDOW_WIDTH / static_cast<float>(getSize());
-
-            block.rect.x = index * block.rect.w;
-            block.rect.y = WINDOW_HEIGHT - static_cast<float>(block.value);
-        }
-
         void renderBlocks(SDL_Renderer* renderer) {
-            SDL_FRect* rects = toArray();
+            //SDL_FRect* rects = toArray();
             for (Uint32 i = 0; i < vec.size(); i++) {
+                rects[i] = vec.at(i).rect;
                 setBlockDimensions(vec.at(i), i);
-
+                
                 if (vec.at(i).targeted)
                     SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
                 else
@@ -92,34 +119,12 @@ namespace GZBlock {
             }
         }
 
-        void fillBlocks(Uint32 numberOfBlocks) {
-            srand(time(NULL));
-
-            for (Uint32 i = 0; i < numberOfBlocks; i++) {
-                Block block = { // { index, value, SDL_FRect, targeted }
-                    i,
-                    (rand() % MAX_VALUE_IN_VECTOR) + 1,
-                    { 0.0f, 0.0f, 0.0f, 0.0f },
-                    false
-                };
-
-                vec.push_back(block);
-            }
-        }
-
-        void switchColors(Block& block) {
-            block.targeted = !block.targeted;
-        }
-
-        SDL_FRect* toArray() {
+        void toArray() {
             size_t vecSize = vec.size();
-
-            SDL_FRect* rects = new SDL_FRect[vecSize];
+            rects = new SDL_FRect[vecSize];
             for (size_t i = 0; i < vecSize; i++) {
                 rects[i] = vec.at(i).rect;
             }
-
-            return rects;
         }
 
         void bubbleSort() {
@@ -151,7 +156,7 @@ namespace GZBlock {
 
             //std::cout << steps.size() << '\n'; //DEBUG STEPS
 
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE); 
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
             SDL_RenderDebugText(renderer, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, std::to_string(steps.size()).c_str());
 
             std::tuple<Uint32, Uint32> step = steps.front();
@@ -163,6 +168,7 @@ namespace GZBlock {
             switchColors(vec.at(secondIndex));
 
             std::swap(vec.at(firstIndex), vec.at(secondIndex));
+            std::swap(rects[firstIndex], rects[secondIndex]);
 
             renderBlocks(renderer);
 
@@ -175,5 +181,43 @@ namespace GZBlock {
 
             steps.pop();
         }
+
+        void fillBlocks(Uint32 numberOfBlocks) {
+            vec.clear();
+
+            srand(time(NULL));
+
+            for (Uint32 i = 0; i < numberOfBlocks; i++) {
+                float blockValue = (rand() % MAX_VALUE_IN_VECTOR) + 1;
+                Block block = { // { index, value, SDL_FRect, targeted }
+                    i,
+                    blockValue,
+                    {//xywh
+                        i * (WINDOW_WIDTH / getSize()), WINDOW_HEIGHT - blockValue,
+                        WINDOW_WIDTH / getSize(), blockValue
+                    },
+                    false
+                };
+
+                vec.push_back(block);
+            }
+        }
+
+        private:
+            bool isInvalidIndex(Uint32 index) {
+                return index < 0 || index > vec.size() - 1;
+            }
+
+            void setBlockDimensions(Block& block, Uint32 index) {
+                block.rect.h = block.value;
+                block.rect.w = WINDOW_WIDTH / static_cast<float>(getSize());
+
+                block.rect.x = index * block.rect.w;
+                block.rect.y = WINDOW_HEIGHT - block.value;
+            }
+
+            void switchColors(Block& block) {
+                block.targeted = !block.targeted;
+            }
     };
 }
