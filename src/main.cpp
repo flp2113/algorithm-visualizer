@@ -15,11 +15,10 @@ static SDL_Renderer* renderer = NULL;
 static SDL_Window* guiWindow = NULL;
 static SDL_Renderer* guiRenderer = NULL;
 
-static int numberOfBlocks = MIN_BLOCKS_IN_VECTOR;
-static GZBlock::BVector bvector(numberOfBlocks);
+static BVector bvector;
 /*****************************************/
 
-void mainLoop(ImGuiIO& io, bool* blockRendering, int* numberOfBlocks) {
+void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, Sint32* delay) {
     bool done = false;
 
     while (!done) {   
@@ -31,7 +30,7 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, int* numberOfBlocks) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
-
+            
             if (event.type == SDL_EVENT_QUIT)
                 done = true;
             if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
@@ -50,40 +49,33 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, int* numberOfBlocks) {
 
         if (*blockRendering) {
             bvector.renderBlocks(renderer);
-            bvector.renderSortSteps(renderer);
+            bvector.renderSortSteps(renderer, *delay);
         }
-            
+
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
+        // GUI Positions
         ImVec2 fixedPosition(GUI_X, GUI_Y);
         ImGui::SetNextWindowPos(fixedPosition, ImGuiCond_Always);
         ImVec2 fixedWindowSize(GUI_WIDTH, GUI_HEIGHT);
         ImGui::SetNextWindowSize(fixedWindowSize, ImGuiCond_Always);
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        //if (show_demo_window)
-            //ImGui::ShowDemoWindow(&show_demo_window);
+        //if (showDemoWindow) ImGui::ShowDemoWindow(showDemoWindow);
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
             ImGui::Begin(GUI_TITLE, nullptr, GUI_WINDOW_FLAGS);   
 
             ImGui::Checkbox("Start", blockRendering);
             
-            if (ImGui::SliderInt("Number of blocks", numberOfBlocks, MIN_BLOCKS_IN_VECTOR, MAX_BLOCKS_IN_VECTOR)) {                
-                bvector.setSize(*numberOfBlocks);
-            }
+            if (ImGui::SliderInt("Number of blocks", numberOfBlocks, MIN_BLOCKS_IN_VECTOR, MAX_BLOCKS_IN_VECTOR))                
+                bvector.resize(*numberOfBlocks);
 
-            //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                //counter++;
-            //ImGui::SameLine();
-            //ImGui::Text("counter = %d", counter);
+            ImGui::SliderInt("Delay", delay, MIN_DELAY, MAX_DELAY);
+                
+            //ImGui::ColorEdit3("Block color", (float*)&blockColor);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
@@ -91,8 +83,6 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, int* numberOfBlocks) {
 
         // Rendering
         ImGui::Render();
-        //SDL_RenderSetScale(guiRenderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-        //SDL_SetRenderDrawColorFloat(renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         SDL_RenderClear(guiRenderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), guiRenderer);
         SDL_RenderPresent(guiRenderer);
@@ -113,13 +103,13 @@ int main(int, char**)
     ImGuiIO& io = setupDearImGui(guiWindow, guiRenderer);
 
     // States
-    //bool show_demo_window = false;
-    //bool show_another_window = false;
-    //ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    Sint32 delay = 50;
+    Sint32 numberOfBlocks = MIN_BLOCKS_IN_VECTOR;
+    bool showDemoWindow = false;
     bool blockRendering = false;
-
+    
     // Main Loop
-    mainLoop(io, &blockRendering, &numberOfBlocks);
+    mainLoop(io, &blockRendering, &numberOfBlocks, &delay);
 
     // Cleanup
     ImGui_ImplSDLRenderer3_Shutdown();
@@ -135,3 +125,4 @@ int main(int, char**)
 
     return 0;
 }
+
