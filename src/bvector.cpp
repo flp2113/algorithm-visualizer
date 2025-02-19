@@ -6,7 +6,10 @@ BVector::BVector() noexcept {
     initialize(MIN_BLOCKS_IN_VECTOR);
 }
 
-BVector::BVector(const Sint32 numberOfBlocks) noexcept {
+BVector::BVector(const Sint32 numberOfBlocks) {
+    if(isInvalidNumberOfBlocks(numberOfBlocks))
+        throw std::out_of_range("CONSTRUCTOR: OUT OF BOUNDS NUMBER OF BLOCKS");
+
     initialize(MIN_BLOCKS_IN_VECTOR);
 }
 
@@ -60,7 +63,10 @@ void BVector::toArray() noexcept {
     }
 }
 
-void BVector::fillBlocks(const Sint32 numberOfBlocks) noexcept {
+void BVector::fillBlocks(const Sint32 numberOfBlocks) {
+    if (isInvalidNumberOfBlocks(numberOfBlocks))
+        throw std::out_of_range("FILL BLOCKS: OUT OF BOUNDS NUMBER OF BLOCKS");
+
     vec.clear();
 
     srand(time(NULL));
@@ -152,6 +158,10 @@ void BVector::bubbleSort() noexcept {
 
 bool BVector::isInvalidIndex(const Sint32 index) const noexcept {
     return index < 0 || index > vec.size() - 1;
+}
+
+bool BVector::isInvalidNumberOfBlocks(const Sint32 numberOfBlocks) const noexcept {
+    return numberOfBlocks < MIN_BLOCKS_IN_VECTOR || numberOfBlocks > MAX_BLOCKS_IN_VECTOR;
 }
 
 void BVector::setBlockDimensions(Block& block, const Sint32 index) const noexcept {
