@@ -18,7 +18,8 @@ static SDL_Renderer* guiRenderer = NULL;
 static BVector bvector;
 /*****************************************/
 
-void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, Sint32* delay) {
+void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, ImVec4 targetedBlockColor,
+              ImVec4 backgroundColor, ImVec4 blocksColor, Sint32* delay) {
     bool done = false;
 
     while (!done) {   
@@ -44,7 +45,8 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, Sint32*
             continue;
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        // Rendering Algorithm
+        SDL_SetRenderDrawColorFloat(renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
         if (*blockRendering) {
@@ -63,7 +65,7 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, Sint32*
         ImVec2 fixedWindowSize(GUI_WIDTH, GUI_HEIGHT);
         ImGui::SetNextWindowSize(fixedWindowSize, ImGuiCond_Always);
 
-        //if (showDemoWindow) ImGui::ShowDemoWindow(showDemoWindow);
+        // if (showDemoWindow) ImGui::ShowDemoWindow(showDemoWindow);
 
         {
             ImGui::Begin(GUI_TITLE, nullptr, GUI_WINDOW_FLAGS);   
@@ -75,19 +77,24 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, Sint32*
 
             ImGui::SliderInt("Delay", delay, MIN_DELAY, MAX_DELAY);
                 
-            //ImGui::ColorEdit3("Block color", (float*)&blockColor);
+            if (ImGui::ColorEdit3("Block color", (float*)&blocksColor))
+                bvector.setColor(blocksColor, BLOCKS_COLOR);
+
+            if (ImGui::ColorEdit3("Background color", (float*)&backgroundColor))
+                bvector.setColor(backgroundColor, BACKGROUND_COLOR);
+
+            if (ImGui::ColorEdit3("Targeted block color", (float*)&targetedBlockColor))
+                bvector.setColor(targetedBlockColor, TARGETED_BLOCK_COLOR);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }
 
-        // Rendering
+        // Rendering GUI
         ImGui::Render();
         SDL_RenderClear(guiRenderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), guiRenderer);
         SDL_RenderPresent(guiRenderer);
-
-        //SDL_RenderPresent(renderer);
     }
 }
 
@@ -103,13 +110,16 @@ int main(int, char**)
     ImGuiIO& io = setupDearImGui(guiWindow, guiRenderer);
 
     // States
-    Sint32 delay = 50;
+    Sint32 delay = MIN_DELAY;
     Sint32 numberOfBlocks = MIN_BLOCKS_IN_VECTOR;
+    ImVec4 blocksColor = ImVec4(210.0f/255, 180.0f/255, 160.0f/255, 1.0f);
+    ImVec4 backgroundColor = ImVec4(60.0f/255, 75.0f/255, 75.0f/255, 1.0f);
+    ImVec4 targetedBlockColor = ImVec4(255.0f/255, 0.0f/255, 0.0f/255, 1.0f);
     bool showDemoWindow = false;
     bool blockRendering = false;
     
     // Main Loop
-    mainLoop(io, &blockRendering, &numberOfBlocks, &delay);
+    mainLoop(io, &blockRendering, &numberOfBlocks, targetedBlockColor, backgroundColor, blocksColor, &delay);
 
     // Cleanup
     ImGui_ImplSDLRenderer3_Shutdown();

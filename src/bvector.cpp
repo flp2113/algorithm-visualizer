@@ -36,11 +36,11 @@ size_t BVector::getSize() const noexcept {
     return vec.size();
 }
 
-void BVector::resize(const size_t size) {
-    if (size > UINT32_MAX)
-        throw std::out_of_range("SET SIZE: INVALID SIZE");
-
-    vec.resize(size);
+void BVector::resize(const Sint32 numberOfBlocks) {
+    if (isInvalidNumberOfBlocks(numberOfBlocks))
+        throw std::out_of_range("RESIZE: OUT OF BOUNDS NUMBER OF BLOCKS");
+    
+    vec.resize(static_cast<size_t>(numberOfBlocks));
     delete[] rects;
     rects = nullptr;
 
@@ -48,7 +48,7 @@ void BVector::resize(const size_t size) {
         steps.pop();
     }
 
-    initialize(size);
+    initialize(numberOfBlocks);
 }
 
 bool BVector::isEmpty() const noexcept {
@@ -69,10 +69,10 @@ void BVector::fillBlocks(const Sint32 numberOfBlocks) {
 
     vec.clear();
 
-    srand(time(NULL));
+    srand(static_cast<Uint32>(time(NULL)));
 
     for (Sint32 i = 0; i < numberOfBlocks; i++) {
-        float blockValue = (rand() % MAX_VALUE_IN_VECTOR) + 1;
+        float blockValue = static_cast<float>((rand() % MAX_VALUE_IN_VECTOR) + 1);
         Block block = {
             i,
             blockValue,
@@ -87,19 +87,26 @@ void BVector::fillBlocks(const Sint32 numberOfBlocks) {
     }
 }
 
+void BVector::setColor(const ImVec4 color, const Sint8 option) noexcept {
+    switch (option) {
+    case BLOCKS_COLOR: bColor = { color.x, color.y, color.z, 1.0f }; break;
+    case BACKGROUND_COLOR: bgColor = { color.x, color.y, color.z, 1.0f }; break;
+    case TARGETED_BLOCK_COLOR: tbColor = { color.x, color.y, color.z, 1.0f }; break;
+    }
+}
+
 void BVector::renderBlocks(SDL_Renderer* renderer) noexcept {
     for (Uint32 i = 0; i < vec.size(); i++) {
         rects[i] = vec.at(i).rect;
         setBlockDimensions(vec.at(i), i);
 
         if (vec.at(i).targeted)
-            SDL_SetRenderDrawColorFloat(renderer, 1.0f, 0.0f, 0.0f, SDL_ALPHA_OPAQUE);
+            SDL_SetRenderDrawColorFloat(renderer, tbColor.x, tbColor.y, tbColor.z, SDL_ALPHA_OPAQUE);
         else
-            SDL_SetRenderDrawColorFloat(renderer, 1.0f, 1.0f, 1.0f, SDL_ALPHA_OPAQUE);
+            SDL_SetRenderDrawColorFloat(renderer, bColor.x, bColor.y, bColor.z, SDL_ALPHA_OPAQUE);
 
         SDL_RenderFillRect(renderer, &rects[i]);
     }
-
 }
 
 void BVector::renderSortSteps(SDL_Renderer* renderer, const Sint32 delay) noexcept {
