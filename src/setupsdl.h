@@ -22,5 +22,6 @@ int setupSDL(SDL_Window** window, SDL_Renderer** renderer, SDL_Window** guiWindo
     }
 
     SDL_SetWindowPosition(*window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    return 0;
 }
 
