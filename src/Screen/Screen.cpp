@@ -17,7 +17,7 @@ void Screen::setup(const char* title, int width, int height,
                    int posX, int posY, SDL_WindowFlags windowFlags) {
 
     if (window != NULL || renderer != NULL)
-        throw std::runtime_error("WINDOW/RENDERER ALREADY SETTED UP!");
+        throw std::runtime_error("WINDOW/RENDERER ALREADY SET UP!");
 
 
     if (!SDL_CreateWindowAndRenderer(title, width, height, windowFlags, &window, &renderer)) {
