@@ -33,12 +33,6 @@
     <ClCompile Include="lib\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lib\imgui\backends\imgui_impl_sdl3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\backends\imgui_impl_sdlgpu3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="lib\imgui\backends\imgui_impl_sdlrenderer3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -49,6 +43,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\BVector\BVector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\backends\imgui_impl_sdl3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,15 +71,6 @@
     <ClInclude Include="lib\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib\imgui\backends\imgui_impl_sdl3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\backends\imgui_impl_sdlgpu3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\imgui\backends\imgui_impl_sdlgpu3_shaders.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="lib\imgui\backends\imgui_impl_sdlrenderer3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -96,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\BVector\BVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\backends\imgui_impl_sdl3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
