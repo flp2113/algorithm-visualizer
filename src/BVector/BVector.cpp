@@ -109,7 +109,7 @@ void BVector::renderBlocks(SDL_Renderer* renderer) noexcept {
     }
 }
 
-void BVector::renderSortSteps(SDL_Renderer* renderer, const Sint32 delay) noexcept {
+void BVector::renderSortSteps(SDL_Renderer* renderer) noexcept {
     if (steps.empty()) {
         SDL_RenderPresent(renderer);
         return;
@@ -133,7 +133,7 @@ void BVector::renderSortSteps(SDL_Renderer* renderer, const Sint32 delay) noexce
 
     SDL_RenderPresent(renderer);
 
-    SDL_Delay(delay);
+    //SDL_Delay(delay);
 
     switchColors(vec.at(firstIndex));
     switchColors(vec.at(secondIndex));

@@ -38,7 +38,7 @@ public:
     void fillBlocks(const Sint32);
     void setColor(const Color, const Sint8)             noexcept;
     void renderBlocks(SDL_Renderer*)                    noexcept;
-    void renderSortSteps(SDL_Renderer*, const Sint32)   noexcept;
+    void renderSortSteps(SDL_Renderer*)                 noexcept;
 private:
     size_t getSize()                                    const noexcept;
     bool isEmpty()                                      const noexcept;

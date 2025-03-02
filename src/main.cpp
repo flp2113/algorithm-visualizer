@@ -36,7 +36,7 @@ void mainLoop(Screen mainScreen, Screen guiScreen, BVector bvector, ImGuiIO& io,
 
         if (*blockRendering) {
             bvector.renderBlocks(mainScreen.renderer);
-            bvector.renderSortSteps(mainScreen.renderer, *delay);
+            bvector.renderSortSteps(mainScreen.renderer);
         }
         
         // Start the Dear ImGui frame
@@ -78,6 +78,8 @@ void mainLoop(Screen mainScreen, Screen guiScreen, BVector bvector, ImGuiIO& io,
         SDL_RenderClear(guiScreen.renderer);
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), guiScreen.renderer);
         SDL_RenderPresent(guiScreen.renderer);
+
+        SDL_Delay(*delay);
     }
 }
 
@@ -107,8 +109,8 @@ int main(int, char**)
         GUI_TITLE,
         GUI_WIDTH,
         GUI_HEIGHT,
-        GUI_X,
-        GUI_Y,
+        GUI_WINDOW_X,
+        GUI_WINDOW_Y,
         GUI_FLAGS
     );
 

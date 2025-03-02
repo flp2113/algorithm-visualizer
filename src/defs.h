@@ -10,8 +10,10 @@
 #define WINDOW_FLAGS                NULL
 
 #define GUI_TITLE                   "Algorithm Visualizer"
-#define GUI_WIDTH                   400.0f
+#define GUI_WIDTH                   450.0f
 #define GUI_HEIGHT                  200.0f
+#define GUI_WINDOW_X				50.0f
+#define GUI_WINDOW_Y				50.0f
 #define GUI_X                       0.0f
 #define GUI_Y                       0.0f
 #define GUI_FLAGS                   NULL
@@ -20,7 +22,7 @@
 #define MAX_VALUE_IN_VECTOR	        500
 #define MIN_BLOCKS_IN_VECTOR        25
 #define MAX_BLOCKS_IN_VECTOR        500
-#define MIN_DELAY                   15
-#define MAX_DELAY                   150
+#define MIN_DELAY                   14
+#define MAX_DELAY                   28
 
 #define Color ImVec4
