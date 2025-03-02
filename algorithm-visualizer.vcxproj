@@ -152,8 +152,10 @@
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\bvector.cpp" />
+    <ClCompile Include="src\BVector\BVector.cpp" />
+    <ClCompile Include="src\Gui\Gui.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Screen\Screen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\backends\imgui_impl_sdl3.h" />
@@ -166,19 +168,24 @@
     <ClInclude Include="lib\imgui\imstb_rectpack.h" />
     <ClInclude Include="lib\imgui\imstb_textedit.h" />
     <ClInclude Include="lib\imgui\imstb_truetype.h" />
-    <ClInclude Include="src\block.h" />
-    <ClInclude Include="src\bvector.h" />
+    <ClInclude Include="src\BVector\Block\block.h" />
+    <ClInclude Include="src\BVector\BVector.h" />
     <ClInclude Include="src\defs.h" />
-    <ClInclude Include="src\setupimgui.h" />
-    <ClInclude Include="src\setupsdl.h" />
+    <ClInclude Include="src\Gui\Gui.h" />
+    <ClInclude Include="src\Screen\Screen.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="lib\imgui\LICENSE.txt" />
+    <Text Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="imgui.ini" />
     <None Include="lib\imgui\.editorconfig" />
     <None Include="lib\imgui\.gitattributes" />
     <None Include="lib\imgui\.gitignore" />
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,3 +22,5 @@
 #define MAX_BLOCKS_IN_VECTOR        500
 #define MIN_DELAY                   15
 #define MAX_DELAY                   150
+
+#define Color ImVec4

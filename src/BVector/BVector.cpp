@@ -1,13 +1,13 @@
 #pragma once
 
-#include "bvector.h"
+#include "BVector.h"
 
 BVector::BVector() noexcept {
     initialize(MIN_BLOCKS_IN_VECTOR);
 }
 
 BVector::BVector(const Sint32 numberOfBlocks) {
-    if(isInvalidNumberOfBlocks(numberOfBlocks))
+    if (isInvalidNumberOfBlocks(numberOfBlocks))
         throw std::out_of_range("CONSTRUCTOR: OUT OF BOUNDS NUMBER OF BLOCKS");
 
     initialize(MIN_BLOCKS_IN_VECTOR);
@@ -39,7 +39,7 @@ size_t BVector::getSize() const noexcept {
 void BVector::resize(const Sint32 numberOfBlocks) {
     if (isInvalidNumberOfBlocks(numberOfBlocks))
         throw std::out_of_range("RESIZE: OUT OF BOUNDS NUMBER OF BLOCKS");
-    
+
     vec.resize(static_cast<size_t>(numberOfBlocks));
     delete[] rects;
     rects = nullptr;
@@ -87,7 +87,7 @@ void BVector::fillBlocks(const Sint32 numberOfBlocks) {
     }
 }
 
-void BVector::setColor(const ImVec4 color, const Sint8 option) noexcept {
+void BVector::setColor(const Color color, const Sint8 option) noexcept {
     switch (option) {
     case BLOCKS_COLOR: bColor = { color.x, color.y, color.z, 1.0f }; break;
     case BACKGROUND_COLOR: bgColor = { color.x, color.y, color.z, 1.0f }; break;
@@ -158,7 +158,7 @@ void BVector::bubbleSort() noexcept {
             }
         }
 
-        if (!swapped) 
+        if (!swapped)
             break;
     }
 }

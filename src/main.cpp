@@ -4,56 +4,41 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 
-#include "setupimgui.h"
-#include "setupsdl.h"
-#include "bvector.h"
+#include "./BVector/BVector.h"
+#include "./Screen/Screen.h"
+#include "./Gui/Gui.h"
 
-/*****************************************/
-static SDL_Window* window = NULL;
-static SDL_Renderer* renderer = NULL;
-
-static SDL_Window* guiWindow = NULL;
-static SDL_Renderer* guiRenderer = NULL;
-
-static BVector bvector;
-/*****************************************/
-
-void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, ImVec4 targetedBlockColor,
-              ImVec4 backgroundColor, ImVec4 blocksColor, Sint32* delay) {
+void mainLoop(Screen mainScreen, Screen guiScreen, BVector bvector, ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, Color targetedBlockColor,
+            Color backgroundColor, Color blocksColor, Sint32* delay) {
     bool done = false;
 
     while (!done) {   
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
             
             if (event.type == SDL_EVENT_QUIT)
                 done = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
+            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(mainScreen.window))
                 done = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(guiWindow))
+            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(guiScreen.window))
                 done = true;
         }
 
-        if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
+        if (SDL_GetWindowFlags(mainScreen.window) & SDL_WINDOW_MINIMIZED) {
             SDL_Delay(10);
             continue;
         }
 
         // Rendering Algorithm
-        SDL_SetRenderDrawColorFloat(renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, SDL_ALPHA_OPAQUE);
-        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColorFloat(mainScreen.renderer, backgroundColor.x, backgroundColor.y, backgroundColor.z, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(mainScreen.renderer);
 
         if (*blockRendering) {
-            bvector.renderBlocks(renderer);
-            bvector.renderSortSteps(renderer, *delay);
+            bvector.renderBlocks(mainScreen.renderer);
+            bvector.renderSortSteps(mainScreen.renderer, *delay);
         }
-
+        
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -64,8 +49,6 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, ImVec4 
         ImGui::SetNextWindowPos(fixedPosition, ImGuiCond_Always);
         ImVec2 fixedWindowSize(GUI_WIDTH, GUI_HEIGHT);
         ImGui::SetNextWindowSize(fixedWindowSize, ImGuiCond_Always);
-
-        // if (showDemoWindow) ImGui::ShowDemoWindow(showDemoWindow);
 
         {
             ImGui::Begin(GUI_TITLE, nullptr, GUI_WINDOW_FLAGS);   
@@ -92,44 +75,65 @@ void mainLoop(ImGuiIO& io, bool* blockRendering, Sint32* numberOfBlocks, ImVec4 
 
         // Rendering GUI
         ImGui::Render();
-        SDL_RenderClear(guiRenderer);
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), guiRenderer);
-        SDL_RenderPresent(guiRenderer);
+        SDL_RenderClear(guiScreen.renderer);
+        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), guiScreen.renderer);
+        SDL_RenderPresent(guiScreen.renderer);
     }
 }
 
 int main(int, char**)
 {
-    //SETUP SDL
-    if (setupSDL(&window, &renderer, &guiWindow, &guiRenderer) == SDL_APP_FAILURE) {
-        SDL_Log("ERROR WHILE SETTING UP SDL!");
+    // INIT IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    // INIT SDL
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-    //SETUP DEAR IMGUI, RETURN IO
-    ImGuiIO& io = setupDearImGui(guiWindow, guiRenderer);
+    // SETUP SCREENS
+    Screen mainScreen = Screen(
+        WINDOW_TITLE,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        WINDOW_FLAGS
+    );
 
-    // States
+    Screen guiScreen = Screen(
+        GUI_TITLE,
+        GUI_WIDTH,
+        GUI_HEIGHT,
+        GUI_X,
+        GUI_Y,
+        GUI_FLAGS
+    );
+
+    // SETUP GUI
+    Gui gui = Gui(&guiScreen);
+    ImGuiIO& io = gui.setup(GUI_WINDOW_FLAGS);
+
+    // STATES
     Sint32 delay = MIN_DELAY;
     Sint32 numberOfBlocks = MIN_BLOCKS_IN_VECTOR;
-    ImVec4 blocksColor = ImVec4(210.0f/255, 180.0f/255, 160.0f/255, 1.0f);
-    ImVec4 backgroundColor = ImVec4(60.0f/255, 75.0f/255, 75.0f/255, 1.0f);
-    ImVec4 targetedBlockColor = ImVec4(255.0f/255, 0.0f/255, 0.0f/255, 1.0f);
-    bool showDemoWindow = false;
+    Color blocksColor = Color(210.0f/255, 180.0f/255, 160.0f/255, 1.0f);
+    Color backgroundColor = Color(60.0f/255, 75.0f/255, 75.0f/255, 1.0f);
+    Color targetedBlockColor = Color(255.0f/255, 0.0f/255, 0.0f/255, 1.0f);
     bool blockRendering = false;
     
-    // Main Loop
-    mainLoop(io, &blockRendering, &numberOfBlocks, targetedBlockColor, backgroundColor, blocksColor, &delay);
+    // SETUP BVECTOR
+    BVector bvector;
 
-    // Cleanup
+    // MAIN LOOP
+    mainLoop(mainScreen, guiScreen, bvector, io, &blockRendering, &numberOfBlocks, targetedBlockColor, backgroundColor, blocksColor, &delay);
+
+    // CLEANUP
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(guiRenderer);
-    SDL_DestroyWindow(guiWindow);
 
     SDL_Quit();
 
